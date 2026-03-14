@@ -1,25 +1,46 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { searchMovies, getCultSciFi, getTopRated, getNewReleases, getHiddenGems } from "@/lib/tmdb";
+import {
+  searchMovies,
+  searchByDirector,
+  getCultSciFi,
+  getTopRated,
+  getNewReleases,
+  getHiddenGems,
+} from "@/lib/tmdb";
 import MovieCard from "@/components/MovieCard";
 import MovieRow from "@/components/MovieRow";
 import SearchForm from "@/components/SearchForm";
 import PersonalRecommendations from "@/components/PersonalRecommendations";
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; type?: string }>;
 }
 
-async function SearchResults({ query, page }: { query: string; page: number }) {
-  const data = await searchMovies(query, page);
+async function SearchResults({ query, page, type }: { query: string; page: number; type: string }) {
+  const isDirector = type === "director";
 
-  if (data.results.length === 0) {
+  let movies;
+  let total: number;
+
+  if (isDirector) {
+    movies = await searchByDirector(query);
+    total = movies.length;
+  } else {
+    const data = await searchMovies(query, page);
+    movies = data.results;
+    total = movies.length;
+  }
+
+  if (movies.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 mt-12">
-        <p className="text-lg italic" style={{ fontFamily: "var(--font-display)", color: "var(--text-dim)" }}>
+      <div className="flex flex-col items-center gap-2 mt-16">
+        <p className="text-base italic" style={{ fontFamily: "var(--font-display)", color: "var(--text-dim)" }}>
           The owls found nothing.
         </p>
-        <p className="text-xs" style={{ color: "var(--text-dim)" }}>No records for &ldquo;{query}&rdquo;</p>
+        <p className="text-xs" style={{ color: "var(--text-dim)" }}>
+          No records for &ldquo;{query}&rdquo;
+        </p>
       </div>
     );
   }
@@ -27,10 +48,15 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
   return (
     <div className="w-full">
       <p className="text-xs mb-6" style={{ color: "var(--text-dim)" }}>
-        <span style={{ color: "var(--gold)" }}>{data.results.length}</span> records found for &ldquo;{query}&rdquo;
+        <span style={{ color: "var(--gold)" }}>{total}</span>{" "}
+        {isDirector ? (
+          <>sci-fi films directed by <span style={{ color: "var(--cream)" }}>{query}</span></>
+        ) : (
+          <>records found for &ldquo;{query}&rdquo;</>
+        )}
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-        {data.results.map((movie) => (
+        {movies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
@@ -58,50 +84,40 @@ async function Homepage() {
 }
 
 export default async function Home({ searchParams }: PageProps) {
-  const { q, page } = await searchParams;
+  const { q, page, type } = await searchParams;
   const query = q?.trim() ?? "";
   const currentPage = Number(page) || 1;
+  const searchType = type ?? "title";
 
   return (
-    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-14 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
+    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
 
       {/* Header */}
-      <div className="text-center flex flex-col items-center gap-4 w-full">
-        <p
-          className="text-xs tracking-widest uppercase"
-          style={{ color: "var(--text-dim)", fontFamily: "var(--font-body)" }}
-        >
+      <div className="text-center flex flex-col items-center gap-3 w-full">
+        <p className="text-xs tracking-widest uppercase" style={{ color: "var(--text-dim)" }}>
           The owls are not what they seem
         </p>
 
         <h1
           className="text-4xl sm:text-5xl md:text-6xl font-black italic leading-tight"
-          style={{
-            fontFamily: "var(--font-display)",
-            color: "var(--cream)",
-            textShadow: "2px 2px 0 var(--red), var(--glow-red)",
-          }}
+          style={{ fontFamily: "var(--font-display)", color: "var(--cream)" }}
         >
           The Black Lodge
         </h1>
 
-        <p
-          className="text-sm italic max-w-xs sm:max-w-sm text-center"
-          style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
-        >
+        <p className="text-sm italic" style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}>
           A damn fine archive of cult & avant-garde sci-fi cinema
         </p>
 
-        <div className="curtain-divider w-full max-w-xs sm:max-w-md mt-1" />
+        <div className="curtain-divider w-full max-w-xs sm:max-w-md mt-2" />
 
         <Link
           href="/favorites"
-          className="link-red-hover text-sm italic px-5 py-2 mt-1"
+          className="link-red-hover text-xs uppercase tracking-widest px-5 py-2 mt-1"
           style={{
-            color: "var(--cream)",
-            border: "1px solid var(--red)",
-            fontFamily: "var(--font-display)",
-            background: "transparent",
+            color: "var(--text-dim)",
+            border: "1px solid var(--border)",
+            letterSpacing: "0.1em",
           }}
         >
           ♥ My Archive
@@ -122,7 +138,7 @@ export default async function Home({ searchParams }: PageProps) {
             </p>
           }
         >
-          <SearchResults query={query} page={currentPage} />
+          <SearchResults query={query} page={currentPage} type={searchType} />
         </Suspense>
       ) : (
         <Suspense

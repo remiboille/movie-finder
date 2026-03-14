@@ -109,3 +109,52 @@ export function posterUrl(path: string | null, size: "w300" | "w500" | "original
   if (!path) return null;
   return `${IMAGE_BASE_URL}/${size}${path}`;
 }
+
+export interface Person {
+  id: number;
+  name: string;
+  known_for_department: string;
+}
+
+export async function searchPersonSuggestions(query: string): Promise<Person[]> {
+  const url = new URL(`${BASE_URL}/search/person`);
+  url.searchParams.set("query", query);
+  url.searchParams.set("include_adult", "false");
+
+  const res = await fetch(url.toString(), {
+    headers: authHeaders(),
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.results as Person[])
+    .filter((p) => p.known_for_department === "Directing")
+    .slice(0, 6);
+}
+
+export async function searchByDirector(name: string): Promise<Movie[]> {
+  const personUrl = new URL(`${BASE_URL}/search/person`);
+  personUrl.searchParams.set("query", name);
+  personUrl.searchParams.set("include_adult", "false");
+
+  const personRes = await fetch(personUrl.toString(), {
+    headers: authHeaders(),
+    next: { revalidate: 3600 },
+  });
+  if (!personRes.ok) return [];
+  const personData = await personRes.json();
+  if (!personData.results?.length) return [];
+
+  const person = personData.results[0];
+
+  const creditsRes = await fetch(`${BASE_URL}/person/${person.id}/movie_credits`, {
+    headers: authHeaders(),
+    next: { revalidate: 3600 },
+  });
+  if (!creditsRes.ok) return [];
+  const creditsData = await creditsRes.json();
+
+  return (creditsData.crew as (Movie & { job: string })[])
+    .filter((c) => c.job === "Director" && c.genre_ids?.includes(SCIFI_GENRE_ID))
+    .sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0));
+}

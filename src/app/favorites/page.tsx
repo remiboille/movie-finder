@@ -8,55 +8,45 @@ export default function FavoritesPage() {
   const { favorites } = useFavorites();
 
   return (
-    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-14 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
+    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
 
-      <div className="text-center flex flex-col items-center gap-4 w-full">
-        <p
-          className="text-xs tracking-widest uppercase"
-          style={{ color: "var(--text-dim)", fontFamily: "var(--font-body)" }}
-        >
+      <div className="text-center flex flex-col items-center gap-3 w-full">
+        <p className="text-xs tracking-widest uppercase" style={{ color: "var(--text-dim)" }}>
           Personal archive
         </p>
 
         <h1
           className="text-4xl sm:text-5xl font-black italic"
-          style={{
-            fontFamily: "var(--font-display)",
-            color: "var(--cream)",
-            textShadow: "2px 2px 0 var(--red), var(--glow-red)",
-          }}
+          style={{ fontFamily: "var(--font-display)", color: "var(--cream)" }}
         >
           My Lodge
         </h1>
 
-        <p
-          className="text-sm italic"
-          style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
-        >
+        <p className="text-sm italic" style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}>
           Films that chose you
         </p>
 
-        <div className="curtain-divider w-full max-w-xs sm:max-w-md mt-1" />
+        <div className="curtain-divider w-full max-w-xs sm:max-w-md mt-2" />
 
         <Link
           href="/"
-          className="link-gold-hover text-sm italic"
-          style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
+          className="link-gold-hover text-xs uppercase tracking-widest mt-1"
+          style={{ color: "var(--text-dim)", letterSpacing: "0.1em" }}
         >
           ← Back to the Lodge
         </Link>
       </div>
 
       {favorites.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 mt-16">
-          <p className="text-5xl" style={{ color: "var(--border)" }}>♡</p>
+        <div className="flex flex-col items-center gap-3 mt-16">
+          <p className="text-4xl" style={{ color: "var(--border)" }}>♡</p>
           <p
-            className="text-lg italic text-center max-w-xs"
+            className="text-base italic text-center"
             style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
           >
             The archive is empty.
           </p>
-          <p className="text-xs text-center" style={{ color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--text-dim)" }}>
             Press ♡ on any film to save it here.
           </p>
         </div>

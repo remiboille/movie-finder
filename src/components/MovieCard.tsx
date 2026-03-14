@@ -36,10 +36,12 @@ export default function MovieCard({ movie }: { movie: Movie }) {
   return (
     <div
       onClick={openTrailer}
-      className="group flex flex-col overflow-hidden transition-all duration-500 cursor-pointer"
+      className="group flex flex-col overflow-hidden cursor-pointer"
       style={{
         background: "var(--surface)",
         border: `1px solid ${hovered ? "var(--red)" : "var(--border)"}`,
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
         boxShadow: hovered ? "var(--glow-red)" : "none",
       }}
       onMouseEnter={() => setHovered(true)}
@@ -52,38 +54,29 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             alt={movie.title}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            className="object-cover transition-all duration-500"
+            className="object-cover"
             style={{
-              opacity: hovered ? 0.6 : 0.85,
-              filter: hovered ? "sepia(30%) contrast(110%)" : "sepia(15%)",
+              opacity: hovered ? 0.55 : 0.9,
+              transition: "opacity 0.3s ease",
             }}
           />
         ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center text-xs chevron-bg"
+            className="absolute inset-0 flex items-center justify-center text-xs"
             style={{ color: "var(--text-dim)" }}
           >
             No Signal
           </div>
         )}
 
-        {/* Film grain on image */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)",
-          }}
-        />
-
         {rating && (
           <span
-            className="absolute top-2 left-2 text-xs px-2 py-0.5"
+            className="absolute top-2 left-2 text-xs px-1.5 py-0.5"
             style={{
-              background: "rgba(13,5,5,0.9)",
+              background: "rgba(10,4,4,0.9)",
               color: "var(--gold)",
-              border: "1px solid var(--gold-dim)",
-              fontFamily: "var(--font-display)",
-              textShadow: "0 0 8px var(--gold)",
+              fontFamily: "var(--font-body)",
+              fontSize: "10px",
             }}
           >
             ★ {rating}
@@ -93,13 +86,12 @@ export default function MovieCard({ movie }: { movie: Movie }) {
         {/* Favorite button */}
         <button
           onClick={(e) => { e.stopPropagation(); toggle(movie); }}
-          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center transition-all duration-300"
+          className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center transition-all duration-200"
           style={{
-            background: "rgba(13,5,5,0.85)",
+            background: "rgba(10,4,4,0.85)",
             border: `1px solid ${faved ? "var(--red)" : "var(--border)"}`,
             color: faved ? "var(--red)" : "var(--text-dim)",
-            boxShadow: faved ? "var(--glow-red)" : "none",
-            fontSize: "15px",
+            fontSize: "12px",
           }}
           title={faved ? "Remove from archive" : "Save to archive"}
         >
@@ -108,17 +100,16 @@ export default function MovieCard({ movie }: { movie: Movie }) {
 
         {/* Play button */}
         <div
-          className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none"
-          style={{ opacity: hovered ? 1 : 0 }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.2s ease" }}
         >
           <div
-            className="flex items-center justify-center w-12 h-12 rounded-full"
+            className="flex items-center justify-center w-10 h-10 rounded-full"
             style={{
-              background: "rgba(13,5,5,0.85)",
-              border: "2px solid var(--red)",
-              boxShadow: "var(--glow-red)",
+              background: "rgba(10,4,4,0.8)",
+              border: "1px solid var(--red)",
               color: "var(--cream)",
-              fontSize: "18px",
+              fontSize: "14px",
             }}
           >
             {loadingTrailer ? "…" : "▶"}
@@ -127,10 +118,11 @@ export default function MovieCard({ movie }: { movie: Movie }) {
 
         {/* Synopsis overlay */}
         <div
-          className="absolute inset-0 flex flex-col justify-end p-3 transition-opacity duration-500 pointer-events-none"
+          className="absolute inset-0 flex flex-col justify-end p-3 pointer-events-none"
           style={{
-            background: "linear-gradient(to top, rgba(13,5,5,0.98) 40%, rgba(13,5,5,0.65) 100%)",
+            background: "linear-gradient(to top, rgba(10,4,4,0.97) 35%, rgba(10,4,4,0.5) 100%)",
             opacity: hovered ? 1 : 0,
+            transition: "opacity 0.3s ease",
           }}
         >
           <p
@@ -141,20 +133,21 @@ export default function MovieCard({ movie }: { movie: Movie }) {
           </p>
         </div>
 
-        {/* Bottom fade (not hovered) */}
+        {/* Bottom fade (resting) */}
         <div
-          className="absolute bottom-0 inset-x-0 h-10 pointer-events-none transition-opacity duration-500"
+          className="absolute bottom-0 inset-x-0 h-8 pointer-events-none"
           style={{
             background: "linear-gradient(to top, var(--surface), transparent)",
             opacity: hovered ? 0 : 1,
+            transition: "opacity 0.3s ease",
           }}
         />
       </div>
 
-      <div className="p-3 flex flex-col gap-1">
+      <div className="px-3 py-2 flex flex-col gap-0.5">
         <p
-          className="text-xs font-bold leading-tight line-clamp-2"
-          style={{ color: "var(--cream)", fontFamily: "var(--font-display)", fontStyle: "italic" }}
+          className="text-xs font-semibold leading-tight line-clamp-2 italic"
+          style={{ color: "var(--cream)", fontFamily: "var(--font-display)" }}
         >
           {movie.title}
         </p>

@@ -3,40 +3,50 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { Movie, posterUrl } from "@/lib/tmdb";
+import { Movie, Person, posterUrl } from "@/lib/tmdb";
+
+type SearchMode = "title" | "director";
 
 export default function SearchForm() {
   const router = useRouter();
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [mode, setMode] = useState<SearchMode>((params.get("type") as SearchMode) ?? "title");
   const [inputValue, setInputValue] = useState(params.get("q") ?? "");
-  const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const [movieSuggestions, setMovieSuggestions] = useState<Movie[]>([]);
+  const [personSuggestions, setPersonSuggestions] = useState<Person[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounced predictive search
   useEffect(() => {
     if (inputValue.trim().length < 2) {
-      setSuggestions([]);
+      setMovieSuggestions([]);
+      setPersonSuggestions([]);
       setShowDropdown(false);
       return;
     }
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(inputValue)}`);
-        const movies: Movie[] = await res.json();
-        setSuggestions(movies);
-        setShowDropdown(movies.length > 0);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(inputValue)}&type=${mode}`);
+        const data = await res.json();
+        if (mode === "director") {
+          setPersonSuggestions(data);
+          setMovieSuggestions([]);
+          setShowDropdown(data.length > 0);
+        } else {
+          setMovieSuggestions(data);
+          setPersonSuggestions([]);
+          setShowDropdown(data.length > 0);
+        }
       } finally {
         setLoading(false);
       }
     }, 320);
     return () => clearTimeout(timer);
-  }, [inputValue]);
+  }, [inputValue, mode]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -47,35 +57,67 @@ export default function SearchForm() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  function handleModeChange(newMode: SearchMode) {
+    setMode(newMode);
+    setInputValue("");
+    setShowDropdown(false);
+    setMovieSuggestions([]);
+    setPersonSuggestions([]);
+  }
+
+  function submit(query: string, searchMode: SearchMode) {
+    setShowDropdown(false);
+    const url = searchMode === "director"
+      ? `/?q=${encodeURIComponent(query)}&type=director`
+      : `/?q=${encodeURIComponent(query)}`;
+    startTransition(() => router.push(url));
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!inputValue.trim()) return;
-    setShowDropdown(false);
-    startTransition(() => router.push(`/?q=${encodeURIComponent(inputValue.trim())}`));
-  }
-
-  function handleSuggestionClick(movie: Movie) {
-    setInputValue(movie.title);
-    setShowDropdown(false);
-    startTransition(() => router.push(`/?q=${encodeURIComponent(movie.title)}`));
+    submit(inputValue.trim(), mode);
   }
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+    <div ref={containerRef} className="relative w-full max-w-2xl flex flex-col gap-3">
+      {/* Mode toggle */}
+      <div className="flex gap-0" style={{ border: "1px solid var(--border)" }}>
+        {(["title", "director"] as SearchMode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => handleModeChange(m)}
+            className="flex-1 py-2 text-xs uppercase tracking-widest transition-all duration-200"
+            style={{
+              background: mode === m ? "var(--red)" : "transparent",
+              color: mode === m ? "var(--cream)" : "var(--text-dim)",
+              fontFamily: "var(--font-body)",
+              letterSpacing: "0.1em",
+            }}
+          >
+            {m === "title" ? "By Title" : "By Director"}
+          </button>
+        ))}
+      </div>
+
+      {/* Input row */}
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+            onFocus={() => (movieSuggestions.length > 0 || personSuggestions.length > 0) && setShowDropdown(true)}
             onKeyDown={(e) => e.key === "Escape" && setShowDropdown(false)}
             type="search"
-            placeholder="Diane, I am entering a film into the archive…"
-            className="w-full px-4 py-3 text-sm outline-none transition-all duration-300"
+            placeholder={
+              mode === "director"
+                ? "Name a director, Diane…"
+                : "Diane, I am entering a film into the archive…"
+            }
+            className="w-full px-4 py-3 text-sm outline-none transition-all duration-200"
             style={{
               background: "var(--surface)",
-              border: `1px solid ${showDropdown ? "var(--gold)" : "var(--border)"}`,
-              boxShadow: showDropdown ? "var(--glow-gold)" : "none",
+              border: `1px solid ${showDropdown ? "var(--red)" : "var(--border)"}`,
               color: "var(--cream)",
               fontFamily: "var(--font-body)",
             }}
@@ -92,64 +134,72 @@ export default function SearchForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="link-red-hover px-6 py-3 text-sm disabled:opacity-40 whitespace-nowrap"
+          className="link-red-hover px-5 py-3 text-xs uppercase tracking-widest disabled:opacity-40 whitespace-nowrap"
           style={{
             background: "transparent",
             color: "var(--cream)",
             border: "1px solid var(--red)",
-            fontFamily: "var(--font-display)",
-            fontStyle: "italic",
+            fontFamily: "var(--font-body)",
+            letterSpacing: "0.1em",
           }}
         >
-          {isPending ? "Walking with fire…" : "Enter the Lodge"}
+          {isPending ? "…" : "Search"}
         </button>
       </form>
 
       {/* Dropdown */}
       {showDropdown && (
         <div
-          className="absolute top-full left-0 right-0 z-50 mt-1 overflow-hidden"
+          className="absolute top-full left-0 right-0 z-50 overflow-hidden"
           style={{
+            marginTop: "2px",
             background: "var(--surface)",
-            border: "1px solid var(--gold-dim)",
-            boxShadow: "var(--glow-gold)",
+            border: "1px solid var(--border)",
           }}
         >
-          {suggestions.map((movie) => {
+          {mode === "title" && movieSuggestions.map((movie) => {
             const thumb = posterUrl(movie.poster_path, "w300");
             const year = movie.release_date?.slice(0, 4) ?? "—";
             return (
               <button
                 key={movie.id}
-                onClick={() => handleSuggestionClick(movie)}
+                onClick={() => { setInputValue(movie.title); submit(movie.title, "title"); }}
                 className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors duration-150"
                 style={{ borderBottom: "1px solid var(--border)" }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface2)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <div
-                  className="flex-none w-8 h-12 relative overflow-hidden"
-                  style={{ background: "var(--surface2)" }}
-                >
+                <div className="flex-none w-8 h-12 relative overflow-hidden" style={{ background: "var(--surface2)" }}>
                   {thumb && (
-                    <Image src={thumb} alt={movie.title} fill className="object-cover" sizes="32px" style={{ filter: "sepia(20%)" }} />
+                    <Image src={thumb} alt={movie.title} fill className="object-cover" sizes="32px" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="text-sm truncate italic"
-                    style={{ color: "var(--cream)", fontFamily: "var(--font-display)" }}
-                  >
+                  <p className="text-sm truncate italic" style={{ color: "var(--cream)", fontFamily: "var(--font-display)" }}>
                     {movie.title}
                   </p>
                   <p className="text-xs" style={{ color: "var(--text-dim)" }}>
-                    {year}
-                    {movie.vote_average > 0 && ` · ★ ${movie.vote_average.toFixed(1)}`}
+                    {year}{movie.vote_average > 0 && ` · ★ ${movie.vote_average.toFixed(1)}`}
                   </p>
                 </div>
               </button>
             );
           })}
+
+          {mode === "director" && personSuggestions.map((person) => (
+            <button
+              key={person.id}
+              onClick={() => { setInputValue(person.name); submit(person.name, "director"); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-150"
+              style={{ borderBottom: "1px solid var(--border)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface2)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <p className="text-sm" style={{ color: "var(--cream)", fontFamily: "var(--font-body)" }}>
+                {person.name}
+              </p>
+            </button>
+          ))}
         </div>
       )}
     </div>
