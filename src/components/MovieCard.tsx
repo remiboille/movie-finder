@@ -10,11 +10,32 @@ export default function MovieCard({ movie }: { movie: Movie }) {
   const year = movie.release_date?.slice(0, 4) ?? "—";
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : null;
   const [hovered, setHovered] = useState(false);
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
   const { toggle, isFavorite } = useFavorites();
   const faved = isFavorite(movie.id);
 
+  async function openTrailer() {
+    setLoadingTrailer(true);
+    try {
+      const res = await fetch(`/api/trailer/${movie.id}`);
+      const { url } = await res.json();
+      if (url) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        window.open(
+          `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " trailer")}`,
+          "_blank",
+          "noopener,noreferrer"
+        );
+      }
+    } finally {
+      setLoadingTrailer(false);
+    }
+  }
+
   return (
     <div
+      onClick={openTrailer}
       className="group flex flex-col overflow-hidden transition-all duration-500 cursor-pointer"
       style={{
         background: "var(--surface)",
@@ -84,6 +105,25 @@ export default function MovieCard({ movie }: { movie: Movie }) {
         >
           {faved ? "♥" : "♡"}
         </button>
+
+        {/* Play button */}
+        <div
+          className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: hovered ? 1 : 0 }}
+        >
+          <div
+            className="flex items-center justify-center w-12 h-12 rounded-full"
+            style={{
+              background: "rgba(13,5,5,0.85)",
+              border: "2px solid var(--red)",
+              boxShadow: "var(--glow-red)",
+              color: "var(--cream)",
+              fontSize: "18px",
+            }}
+          >
+            {loadingTrailer ? "…" : "▶"}
+          </div>
+        </div>
 
         {/* Synopsis overlay */}
         <div
