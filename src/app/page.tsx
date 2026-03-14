@@ -96,20 +96,12 @@ export default async function Home({ searchParams }: PageProps) {
 
         <Link
           href="/favorites"
-          className="text-sm italic px-5 py-2 transition-all duration-300 mt-1"
+          className="link-red-hover text-sm italic px-5 py-2 mt-1"
           style={{
             color: "var(--cream)",
             border: "1px solid var(--red)",
             fontFamily: "var(--font-display)",
             background: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--red)";
-            e.currentTarget.style.boxShadow = "var(--glow-red)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.boxShadow = "none";
           }}
         >
           ♥ My Archive

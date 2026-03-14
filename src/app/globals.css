@@ -86,6 +86,21 @@ body::after {
   box-shadow: var(--glow-red);
 }
 
+/* Link hover utilities */
+.link-red-hover {
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.link-red-hover:hover {
+  background: var(--red) !important;
+  box-shadow: var(--glow-red);
+}
+.link-gold-hover {
+  transition: color 0.2s;
+}
+.link-gold-hover:hover {
+  color: var(--gold) !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { height: 4px; width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

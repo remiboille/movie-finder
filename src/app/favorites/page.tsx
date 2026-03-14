@@ -40,10 +40,8 @@ export default function FavoritesPage() {
 
         <Link
           href="/"
-          className="text-sm italic transition-colors duration-200"
+          className="link-gold-hover text-sm italic"
           style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-dim)")}
         >
           ← Back to the Lodge
         </Link>
