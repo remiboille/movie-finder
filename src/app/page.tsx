@@ -15,19 +15,21 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
 
   if (data.results.length === 0) {
     return (
-      <p className="text-sm tracking-widest mt-8" style={{ color: "var(--text-dim)" }}>
-        NO MATCHING RECORDS FOR &ldquo;{query.toUpperCase()}&rdquo;
-      </p>
+      <div className="flex flex-col items-center gap-3 mt-12">
+        <p className="text-lg italic" style={{ fontFamily: "var(--font-display)", color: "var(--text-dim)" }}>
+          The owls found nothing.
+        </p>
+        <p className="text-xs" style={{ color: "var(--text-dim)" }}>No records for &ldquo;{query}&rdquo;</p>
+      </div>
     );
   }
 
   return (
     <div className="w-full">
-      <p className="text-xs tracking-widest mb-6" style={{ color: "var(--text-dim)" }}>
-        <span style={{ color: "var(--cyan)" }}>{data.results.length}</span> RECORDS RETRIEVED
-        &nbsp;/&nbsp; QUERY: <span style={{ color: "var(--cyan)" }}>{query.toUpperCase()}</span>
+      <p className="text-xs mb-6" style={{ color: "var(--text-dim)" }}>
+        <span style={{ color: "var(--gold)" }}>{data.results.length}</span> records found for &ldquo;{query}&rdquo;
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {data.results.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
@@ -47,10 +49,10 @@ async function Homepage() {
   return (
     <div className="w-full flex flex-col gap-12">
       <PersonalRecommendations />
-      <MovieRow title="CULT &amp; AVANT-GARDE" subtitle="CLASSIFIED TRANSMISSIONS" movies={cult} accentColor="magenta" />
-      <MovieRow title="TOP RATED" subtitle="HIGHEST RANKED IN THE ARCHIVE" movies={topRated} accentColor="cyan" />
-      <MovieRow title="NEW RELEASES" subtitle="RECENT SIGNALS DETECTED" movies={newReleases} accentColor="amber" />
-      <MovieRow title="HIDDEN GEMS" subtitle="LOW PROFILE — HIGH VALUE" movies={hiddenGems} accentColor="cyan" />
+      <MovieRow title="Fire Walk With Me" subtitle="Cult & avant-garde transmissions" movies={cult} accentColor="red" />
+      <MovieRow title="The Log Has Spoken" subtitle="Highest rated in the archive" movies={topRated} accentColor="gold" />
+      <MovieRow title="New Signals" subtitle="Recent arrivals from beyond" movies={newReleases} accentColor="gold" />
+      <MovieRow title="The Owls Know" subtitle="Hidden gems, low profile — high value" movies={hiddenGems} accentColor="red" />
     </div>
   );
 }
@@ -61,47 +63,56 @@ export default async function Home({ searchParams }: PageProps) {
   const currentPage = Number(page) || 1;
 
   return (
-    <main className="min-h-screen px-6 py-12 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
+    <main className="min-h-screen px-4 sm:px-6 py-10 sm:py-14 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
 
       {/* Header */}
-      <div className="text-center flex flex-col items-center gap-3 w-full">
+      <div className="text-center flex flex-col items-center gap-4 w-full">
         <p
-          className="text-xs tracking-[0.4em]"
-          style={{ color: "var(--magenta)", textShadow: "var(--glow-magenta)" }}
+          className="text-xs tracking-widest uppercase"
+          style={{ color: "var(--text-dim)", fontFamily: "var(--font-body)" }}
         >
-          NEXUS CORP // ARCHIVE DIVISION
-        </p>
-        <h1
-          className="text-4xl md:text-5xl font-black tracking-widest"
-          style={{
-            fontFamily: "var(--font-display)",
-            color: "var(--cyan)",
-            textShadow: "var(--glow-cyan)",
-          }}
-        >
-          SCI-FI FINDER
-        </h1>
-        <p className="text-xs tracking-[0.3em]" style={{ color: "var(--text-dim)" }}>
-          CLASSIFIED DATABASE &mdash; GENRE 878 &mdash; AUTHORIZED ACCESS ONLY
+          The owls are not what they seem
         </p>
 
-        <div className="flex items-center gap-3 w-full max-w-md mt-1">
-          <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-          <span className="text-xs tracking-widest" style={{ color: "var(--cyan)" }}>◈</span>
-          <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-        </div>
+        <h1
+          className="text-4xl sm:text-5xl md:text-6xl font-black italic leading-tight"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--cream)",
+            textShadow: "2px 2px 0 var(--red), var(--glow-red)",
+          }}
+        >
+          The Black Lodge
+        </h1>
+
+        <p
+          className="text-sm italic max-w-xs sm:max-w-sm text-center"
+          style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}
+        >
+          A damn fine archive of cult & avant-garde sci-fi cinema
+        </p>
+
+        <div className="curtain-divider w-full max-w-xs sm:max-w-md mt-1" />
 
         <Link
           href="/favorites"
-          className="text-xs tracking-widest px-4 py-1.5 transition-all duration-200 mt-1"
+          className="text-sm italic px-5 py-2 transition-all duration-300 mt-1"
           style={{
-            color: "var(--magenta)",
-            border: "1px solid var(--magenta)",
-            boxShadow: "var(--glow-magenta)",
+            color: "var(--cream)",
+            border: "1px solid var(--red)",
             fontFamily: "var(--font-display)",
+            background: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--red)";
+            e.currentTarget.style.boxShadow = "var(--glow-red)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.boxShadow = "none";
           }}
         >
-          ♥ MY ARCHIVE
+          ♥ My Archive
         </Link>
       </div>
 
@@ -114,8 +125,8 @@ export default async function Home({ searchParams }: PageProps) {
       {query ? (
         <Suspense
           fallback={
-            <p className="text-xs tracking-widest animate-pulse mt-8" style={{ color: "var(--cyan)" }}>
-              SCANNING DATABASE…
+            <p className="text-sm italic mt-8 animate-pulse" style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}>
+              The owls are searching…
             </p>
           }
         >
@@ -124,8 +135,8 @@ export default async function Home({ searchParams }: PageProps) {
       ) : (
         <Suspense
           fallback={
-            <p className="text-xs tracking-widest animate-pulse mt-8" style={{ color: "var(--cyan)" }}>
-              LOADING TRANSMISSIONS…
+            <p className="text-sm italic mt-8 animate-pulse" style={{ color: "var(--text-dim)", fontFamily: "var(--font-display)" }}>
+              Entering the lodge…
             </p>
           }
         >

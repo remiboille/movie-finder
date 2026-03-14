@@ -5,47 +5,36 @@ interface MovieRowProps {
   title: string;
   subtitle?: string;
   movies: Movie[];
-  accentColor?: "cyan" | "magenta" | "amber";
+  accentColor?: "red" | "gold";
 }
 
-export default function MovieRow({
-  title,
-  subtitle,
-  movies,
-  accentColor = "cyan",
-}: MovieRowProps) {
+export default function MovieRow({ title, subtitle, movies, accentColor = "gold" }: MovieRowProps) {
   if (movies.length === 0) return null;
-
-  const color =
-    accentColor === "magenta"
-      ? "var(--magenta)"
-      : accentColor === "amber"
-      ? "var(--amber)"
-      : "var(--cyan)";
+  const color = accentColor === "red" ? "var(--red)" : "var(--gold)";
 
   return (
     <section className="w-full flex flex-col gap-4">
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         <h2
-          className="text-sm font-bold tracking-widest"
+          className="text-base sm:text-lg font-bold italic"
           style={{ fontFamily: "var(--font-display)", color }}
         >
           {title}
         </h2>
         {subtitle && (
-          <p className="text-xs tracking-widest" style={{ color: "var(--text-dim)" }}>
+          <p className="text-xs" style={{ color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>
             {subtitle}
           </p>
         )}
-        <div className="h-px mt-2" style={{ background: `linear-gradient(to right, ${color}44, transparent)` }} />
+        <div className="curtain-divider mt-1" />
       </div>
 
       <div
-        className="flex gap-4 overflow-x-auto pb-3"
-        style={{ scrollbarWidth: "thin", scrollbarColor: "var(--border) transparent" }}
+        className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "var(--border) transparent", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
       >
         {movies.map((movie) => (
-          <div key={movie.id} className="flex-none w-36 sm:w-44">
+          <div key={movie.id} className="flex-none w-28 sm:w-36 md:w-40">
             <MovieCard movie={movie} />
           </div>
         ))}

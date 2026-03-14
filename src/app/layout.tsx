@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Orbitron, Share_Tech_Mono } from "next/font/google";
+import { Playfair_Display, Special_Elite } from "next/font/google";
 import "./globals.css";
 
-const orbitron = Orbitron({
+const playfair = Playfair_Display({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "700", "900"],
+  style: ["normal", "italic"],
 });
 
-const shareTechMono = Share_Tech_Mono({
+const specialElite = Special_Elite({
   variable: "--font-body",
   subsets: ["latin"],
   weight: "400",
 });
 
 export const metadata: Metadata = {
-  title: "NEXUS // Sci-Fi Movie Finder",
-  description: "Search and discover sci-fi movies powered by TMDB",
+  title: "The Black Lodge — Sci-Fi Cinema",
+  description: "The owls are not what they seem. A cult sci-fi film archive.",
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${orbitron.variable} ${shareTechMono.variable} antialiased`}>
+      <body className={`${playfair.variable} ${specialElite.variable} antialiased`}>
         {children}
       </body>
     </html>

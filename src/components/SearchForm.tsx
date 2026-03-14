@@ -19,49 +19,42 @@ export default function SearchForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-3 w-full max-w-2xl">
-      <div className="relative flex-1">
-        <span
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-xs tracking-widest pointer-events-none"
-          style={{ color: "var(--cyan)", fontFamily: "var(--font-display)" }}
-        >
-          &gt;_
-        </span>
-        <input
-          ref={inputRef}
-          defaultValue={params.get("q") ?? ""}
-          type="search"
-          placeholder="SEARCH DESIGNATION..."
-          className="w-full pl-10 pr-4 py-3 text-sm tracking-widest outline-none transition-all duration-200"
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--text)",
-            fontFamily: "var(--font-body)",
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = "var(--cyan)";
-            e.currentTarget.style.boxShadow = "var(--glow-cyan)";
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = "var(--border)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl px-0">
+      <input
+        ref={inputRef}
+        defaultValue={params.get("q") ?? ""}
+        type="search"
+        placeholder="Diane, I am entering a film into the archive…"
+        className="flex-1 px-4 py-3 text-sm outline-none transition-all duration-300"
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          color: "var(--cream)",
+          fontFamily: "var(--font-body)",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "var(--gold)";
+          e.currentTarget.style.boxShadow = "var(--glow-gold)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "var(--border)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      />
       <button
         type="submit"
         disabled={isPending}
-        className="px-6 py-3 text-xs font-bold tracking-widest transition-all duration-200 disabled:opacity-40"
+        className="px-6 py-3 text-sm transition-all duration-300 disabled:opacity-40 whitespace-nowrap"
         style={{
-          background: isPending ? "transparent" : "var(--cyan)",
-          color: isPending ? "var(--cyan)" : "var(--bg)",
-          border: "1px solid var(--cyan)",
-          boxShadow: isPending ? "none" : "var(--glow-cyan)",
+          background: isPending ? "transparent" : "var(--red)",
+          color: "var(--cream)",
+          border: "1px solid var(--red)",
+          boxShadow: isPending ? "none" : "var(--glow-red)",
           fontFamily: "var(--font-display)",
+          fontStyle: "italic",
         }}
       >
-        {isPending ? "SCANNING…" : "SCAN"}
+        {isPending ? "Walking with fire…" : "Enter the Lodge"}
       </button>
     </form>
   );

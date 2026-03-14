@@ -25,10 +25,10 @@ export default function PersonalRecommendations() {
 
   return (
     <MovieRow
-      title="BECAUSE YOU SAVED"
-      subtitle={sourceName.toUpperCase()}
+      title="Because you dreamed of"
+      subtitle={sourceName}
       movies={recs}
-      accentColor="magenta"
+      accentColor="red"
     />
   );
 }
