@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #04050d;
+  --surface: #0a0c1a;
+  --surface2: #0f1224;
+  --cyan: #00d4ff;
+  --cyan-dim: #00a3c4;
+  --magenta: #ff2d78;
+  --amber: #ffaa00;
+  --text: #c8e6f0;
+  --text-dim: #5a7a8a;
+  --border: #1a2a3a;
+  --glow-cyan: 0 0 8px #00d4ff88, 0 0 20px #00d4ff33;
+  --glow-magenta: 0 0 8px #ff2d7888, 0 0 20px #ff2d7833;
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), "Share Tech Mono", monospace;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Scanlines overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Subtle vignette */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+  z-index: 99;
+}
+
+.neon-text {
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.neon-border {
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.neon-border-magenta {
+  border-color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+}

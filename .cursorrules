@@ -1,0 +1,18 @@
+# Movie Finder — Cursor Rules
+
+## Project
+Internal tool for finding and browsing movies.
+
+## Stack
+- Next.js 15 (App Router)
+- TypeScript (strict)
+- Tailwind CSS
+- Deployed on Vercel
+
+## Conventions
+- All components in `src/components/`, co-located with their styles if needed
+- Server components by default; add `"use client"` only when necessary
+- Fetch data in Server Components or Route Handlers, not in client components
+- Use TypeScript interfaces for all data shapes
+- Prefer `async/await` over `.then()` chains
+- Keep components small and single-purpose
