@@ -26,10 +26,22 @@ export interface SearchResponse {
   total_results: number;
 }
 
-export async function searchMovies(
-  query: string,
-  page = 1
-): Promise<SearchResponse> {
+async function discover(params: Record<string, string>, revalidate = 3600): Promise<Movie[]> {
+  const url = new URL(`${BASE_URL}/discover/movie`);
+  url.searchParams.set("with_genres", String(SCIFI_GENRE_ID));
+  url.searchParams.set("include_adult", "false");
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+
+  const res = await fetch(url.toString(), {
+    headers: authHeaders(),
+    next: { revalidate },
+  });
+  if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
+  const data: SearchResponse = await res.json();
+  return data.results;
+}
+
+export async function searchMovies(query: string, page = 1): Promise<SearchResponse> {
   const url = new URL(`${BASE_URL}/search/movie`);
   url.searchParams.set("query", query);
   url.searchParams.set("page", String(page));
@@ -41,8 +53,6 @@ export async function searchMovies(
   });
   if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
   const data: SearchResponse = await res.json();
-
-  // Filter to sci-fi only
   return {
     ...data,
     results: data.results.filter((m) => m.genre_ids.includes(SCIFI_GENRE_ID)),
@@ -50,29 +60,52 @@ export async function searchMovies(
 }
 
 // TMDB keyword IDs: 9840 = cult film, 10084 = avant-garde
-const CULT_KEYWORDS = "9840,10084";
-
-export async function discoverSciFi(page = 1): Promise<SearchResponse> {
-  const url = new URL(`${BASE_URL}/discover/movie`);
-  url.searchParams.set("with_genres", String(SCIFI_GENRE_ID));
-  url.searchParams.set("with_keywords", CULT_KEYWORDS);
-  url.searchParams.set("sort_by", "vote_average.desc");
-  url.searchParams.set("vote_count.gte", "150");
-  url.searchParams.set("include_adult", "false");
-  url.searchParams.set("page", String(page));
-
-  const res = await fetch(url.toString(), {
-    headers: authHeaders(),
-    next: { revalidate: 3600 },
+export async function getCultSciFi(): Promise<Movie[]> {
+  return discover({
+    with_keywords: "9840,10084",
+    sort_by: "vote_average.desc",
+    "vote_count.gte": "150",
   });
-  if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
-  return res.json();
 }
 
-export function posterUrl(
-  path: string | null,
-  size: "w300" | "w500" | "original" = "w300"
-) {
+export async function getTopRated(): Promise<Movie[]> {
+  return discover({
+    sort_by: "vote_average.desc",
+    "vote_count.gte": "500",
+  });
+}
+
+export async function getNewReleases(): Promise<Movie[]> {
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 2);
+  return discover({
+    sort_by: "popularity.desc",
+    "primary_release_date.gte": cutoff.toISOString().slice(0, 10),
+  }, 3600);
+}
+
+export async function getHiddenGems(): Promise<Movie[]> {
+  return discover({
+    sort_by: "vote_average.desc",
+    "vote_average.gte": "7.0",
+    "vote_count.gte": "50",
+    "vote_count.lte": "800",
+    "popularity.lte": "20",
+  });
+}
+
+export async function getRecommendations(movieId: number): Promise<Movie[]> {
+  const url = `${BASE_URL}/movie/${movieId}/recommendations`;
+  const res = await fetch(url, {
+    headers: authHeaders(),
+    next: { revalidate: 86400 },
+  });
+  if (!res.ok) return [];
+  const data: SearchResponse = await res.json();
+  return data.results.filter((m) => m.genre_ids.includes(SCIFI_GENRE_ID));
+}
+
+export function posterUrl(path: string | null, size: "w300" | "w500" | "original" = "w300") {
   if (!path) return null;
   return `${IMAGE_BASE_URL}/${size}${path}`;
 }

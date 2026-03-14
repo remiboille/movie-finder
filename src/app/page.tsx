@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { searchMovies, discoverSciFi } from "@/lib/tmdb";
+import { searchMovies, getCultSciFi, getTopRated, getNewReleases, getHiddenGems } from "@/lib/tmdb";
 import MovieCard from "@/components/MovieCard";
+import MovieRow from "@/components/MovieRow";
 import SearchForm from "@/components/SearchForm";
+import PersonalRecommendations from "@/components/PersonalRecommendations";
 
 interface PageProps {
   searchParams: Promise<{ q?: string; page?: string }>;
@@ -34,23 +36,21 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
   );
 }
 
-async function Featured() {
-  const data = await discoverSciFi();
+async function Homepage() {
+  const [cult, topRated, newReleases, hiddenGems] = await Promise.all([
+    getCultSciFi(),
+    getTopRated(),
+    getNewReleases(),
+    getHiddenGems(),
+  ]);
 
   return (
-    <div className="w-full">
-      <p
-        className="text-xs tracking-widest mb-6"
-        style={{ color: "var(--text-dim)" }}
-      >
-        TRANSMISSION INCOMING &mdash;&nbsp;
-        <span style={{ color: "var(--magenta)" }}>CULT &amp; AVANT-GARDE SCI-FI</span>
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {data.results.slice(0, 18).map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
+    <div className="w-full flex flex-col gap-12">
+      <PersonalRecommendations />
+      <MovieRow title="CULT &amp; AVANT-GARDE" subtitle="CLASSIFIED TRANSMISSIONS" movies={cult} accentColor="magenta" />
+      <MovieRow title="TOP RATED" subtitle="HIGHEST RANKED IN THE ARCHIVE" movies={topRated} accentColor="cyan" />
+      <MovieRow title="NEW RELEASES" subtitle="RECENT SIGNALS DETECTED" movies={newReleases} accentColor="amber" />
+      <MovieRow title="HIDDEN GEMS" subtitle="LOW PROFILE — HIGH VALUE" movies={hiddenGems} accentColor="cyan" />
     </div>
   );
 }
@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: PageProps) {
     <main className="min-h-screen px-6 py-12 flex flex-col items-center gap-10 max-w-screen-xl mx-auto">
 
       {/* Header */}
-      <div className="text-center flex flex-col items-center gap-3">
+      <div className="text-center flex flex-col items-center gap-3 w-full">
         <p
           className="text-xs tracking-[0.4em]"
           style={{ color: "var(--magenta)", textShadow: "var(--glow-magenta)" }}
@@ -85,7 +85,6 @@ export default async function Home({ searchParams }: PageProps) {
           CLASSIFIED DATABASE &mdash; GENRE 878 &mdash; AUTHORIZED ACCESS ONLY
         </p>
 
-        {/* Decorative line */}
         <div className="flex items-center gap-3 w-full max-w-md mt-1">
           <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
           <span className="text-xs tracking-widest" style={{ color: "var(--cyan)" }}>◈</span>
@@ -111,7 +110,7 @@ export default async function Home({ searchParams }: PageProps) {
         <SearchForm />
       </Suspense>
 
-      {/* Results */}
+      {/* Content */}
       {query ? (
         <Suspense
           fallback={
@@ -130,7 +129,7 @@ export default async function Home({ searchParams }: PageProps) {
             </p>
           }
         >
-          <Featured />
+          <Homepage />
         </Suspense>
       )}
     </main>
